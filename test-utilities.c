@@ -58,6 +58,26 @@ int test_minimal_header_parse(void) {
   return 0;
 }
 
+int test_parse_header_compression_and_float(void) {
+
+  uint8_t input_data[] = {0x02, 0x13, 0x03, (1 << 7) | (1 << 3), 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+    0x01, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x0F,
+    0x10, 0x01};
+  packlab_config_t config;
+  parse_header(input_data, 20, &config);
+
+  if (!config.is_compressed || !config.should_float || config.is_checksummed || config.is_encrypted || !config.is_valid) {
+    printf("error: incorrect flags for compression and float.");
+    return 1;
+  }
+  printf("**SUCCESS**\n");
+  printf("test_float_and_compression_test_successful\n");
+  return 0;
+}
 
 // create a test for parse_header, using a checksum and no dict.
 int test_checksum_header_parse(void) {
@@ -358,6 +378,8 @@ int main(void) {
   // You can craft arbitrary array data as inputs to the functions
   // Parsing headers, checksumming, decryption, and decompressing are all testable
   result = test_minimal_header_parse();
+
+  result = test_parse_header_compression_and_float();
   
   result = test_checksum_header_parse();
 
