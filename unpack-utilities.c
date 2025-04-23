@@ -146,7 +146,6 @@ uint16_t calculate_checksum(uint8_t* input_data, size_t input_len) {
   return sum;
   
 
-  return 0;
 }
 
 uint16_t lfsr_step(uint16_t oldstate) {
@@ -221,6 +220,7 @@ size_t decompress_data(uint8_t* input_data, size_t input_len,
 
   // loop through the data
   int j = 0;
+  bool lastByteWritten = false;
   for (int i = 0; i < input_len - 1; i++){
     // write as regular if not compressed
     if (input_data[i] != 0x07){
@@ -243,14 +243,18 @@ size_t decompress_data(uint8_t* input_data, size_t input_len,
         }
       }
       i++;
+      if (i == input_len - 1) {
+        lastByteWritten = true;
+      }
     }
   }
   // check if last byte has been written, and write it if not.
-  if (j < output_len) {
+  if (!lastByteWritten) {
     output_data[j] = input_data[input_len - 1];
     j++;
   }
   return j;
+  
 }
 
 void join_float_array(uint8_t* input_signfrac, size_t input_len_bytes_signfrac,
