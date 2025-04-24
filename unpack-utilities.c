@@ -307,6 +307,33 @@ void join_float_array_three_stream(uint8_t* input_frac,
       input_frac_bits[i * 8 + j] = (input_frac[i] >> (7 - j)) & 1;
     }
   }
+  
+  for (int i = 0; i < input_len_bytes_exp; i++) {
+
+    int frac_start = 23 * i;
+    uint8_t byte1 = 0;
+    uint8_t byte2 = 0;
+    for (int j = 0; j < 8; j++) {
+      byte1 = byte1 | (input_frac_bits[frac_start + j] << (7 - j));
+      byte2 = byte2 | ((input_frac_bits[frac_start + j + 8]) << (7 - j));
+    }
+
+    uint8_t byte3 = 0;
+    for (int j = 0; j < 8; j++) {
+      byte3 = byte3 | ((input_frac_bits[frac_start + j + 16]) << (7 - j));
+    }
+    byte3 = byte3 | ((input_exp[i] & 1) << 7);
+
+    uint8_t signBit = (input_sign[i / 8] >> (i % 8)) & 1;
+
+    uint8_t byte4 = input_exp[i] >> 1;
+    byte4 = byte4 | (signBit << 7);
+    
+    output_data[4 * i] = byte1;
+    output_data[4 * i + 1] = byte2;
+    output_data[4 * i + 2] = byte3;
+    output_data[4 * i + 3] = byte4;
+  }  
 
 }
 
